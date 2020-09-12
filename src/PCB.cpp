@@ -1,5 +1,8 @@
 #include "PCB.h"
+#include "thread.h"
 #include <dos.h>
+
+volatile PCB* PCB::running=NULL;
 
 PCB::PCB(StackSize sSize, Time tmSlc, Thread* myth):stackSize(sSize/2), timeSlice(tmSlc), myThread(myth), blocked(0), finished(0){ 
     if(stackSize!=0){
@@ -9,7 +12,7 @@ PCB::PCB(StackSize sSize, Time tmSlc, Thread* myth):stackSize(sSize/2), timeSlic
         stack[stackSize-3]=FP_OFF(wrapper);
 
         ss=FP_SEG(stack+stackSize-12);
-        sp=FP_OFF(stack+stackSize-12);
+        bp=sp=FP_OFF(stack+stackSize-12);
 
         blockedOnMe=new List();
     }
@@ -19,17 +22,21 @@ void PCB::wrapper(){
     running->myThread->run();
 
     lock
-    finished=1;
-    Thread* t=blockedOnMe->removeFirst();
+    cout<<flush;
+    running->finished=1;
+    Thread* t=running->blockedOnMe->removeFirst();
     while(t){
         t->myPCB->blocked=0;
-        Scheduler::put(t);
-        t=blockedOnMe->removeFirst();
+        Scheduler::put(t->myPCB);
+        t=running->blockedOnMe->removeFirst();
     }
     unlock
+    dispatch();
 }
 
 PCB::~PCB(){
-    delete[] stack;
-    delete blockedOnMe;
+    if(stackSize!=0){
+        delete[] stack;
+        delete blockedOnMe;
+    }
 }

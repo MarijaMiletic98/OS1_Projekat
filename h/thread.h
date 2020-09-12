@@ -13,7 +13,7 @@ typedef unsigned int Time; // time, x 55ms
 const Time defaultTimeSlice = 2; // default = 2*55ms
 typedef int ID;
 class PCB; // Kernel's implementation of a user's thread
-volatile PCB* running;
+class List;
 
 class Thread {
     public:
@@ -26,6 +26,7 @@ class Thread {
 
     protected:
     friend class PCB;
+    friend class KernelSem;
     Thread (StackSize stackSize = defaultStackSize, Time timeSlice = defaultTimeSlice);
     virtual void run() {}
 
@@ -39,10 +40,10 @@ class Thread {
 
 class LoopThread:public Thread{
     protected:
-    virtual void run(){
-        while(1);
-    }
-}
+    friend class System;
+    LoopThread(StackSize stackSize = defaultStackSize, Time timeSlice = defaultTimeSlice):Thread(stackSize, timeSlice){}
+    virtual void run();
+};
 
 void dispatch ();
 #endif

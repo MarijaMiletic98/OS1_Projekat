@@ -1,7 +1,16 @@
-#ifndef _thread_h_
-#define _thread_h_
+#ifndef _pcb_h_
+#define _pcb_h_
 
 #include "thread.h"
+#include "list.h"
+#include "System.h"
+#include "SCHEDULE.H"
+
+typedef unsigned int Time; // time, x 55ms
+typedef unsigned long StackSize;
+
+class Thread;
+class List;
 
 class PCB{
     public:
@@ -12,13 +21,16 @@ class PCB{
     private:
     friend class Thread;
     friend class System;
-    unsigned ss, sp;
+    friend class KernelSem;
+    unsigned ss, sp, bp;
     StackSize stackSize;
     Time timeSlice;
+    unsigned unblockedAfterTime;
     unsigned* stack;
     Thread* myThread;
     unsigned blocked;
     unsigned finished;
     List* blockedOnMe;
+    static volatile PCB* running;
 };
 #endif

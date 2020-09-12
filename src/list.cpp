@@ -2,14 +2,14 @@
 
 List::List():head(NULL),last(NULL){}
 
-void List::add(Thread* t){
+void List::add(Thread* t, int blockedWaitingTime=0){
     lock
     if(!head) {
-        head=new Elem(t,NULL);
+        head=new Elem(t,NULL,blockedWaitingTime);
         last=head;
     }
     else {
-        last->next=new Elem(t,NULL);
+        last->next=new Elem(t,NULL, blockedWaitingTime);
         last=last->next;
     }
     unlock
@@ -19,7 +19,7 @@ Thread* List::remove(ID id){
     lock
     Elem* p=head, *preth=NULL;
     while(p){
-        if(p->thread->getID()==id) {
+        if(p->thread->getId()==id) {
             Thread* t=p->thread;
             if(preth) preth->next=p->next;
             else {
@@ -42,7 +42,7 @@ Thread* List::get(ID id){
     lock
     Elem* p=head;
     while(p){
-        if(p->thread->getID()==id) {
+        if(p->thread->getId()==id) {
             unlock
             return p->thread;
         }
@@ -65,6 +65,39 @@ Thread* List::removeFirst(){
     delete p;
     unlock
     return th;
+}
+
+int List::checkTime(){
+    int i=0;
+    Elem* p=head, *preth=NULL;
+    while(p){
+        if(p->blockedWaitingTime>0) {
+            p->blockedWaitingTime--;
+            if(p->blockedWaitingTime==0){
+                Thread* t=p->thread;
+                if(preth==NULL){
+                    head=head->next;
+                    if(head==NULL) last=NULL;
+                }
+                else preth->next=p->next;
+                delete p;
+                if(preth) p=preth->next;
+                else p=head;
+                t->myPCB->blocked=0;
+                t->myPCB->unblockedAfterTime=1;
+                Scheduler::put(t);
+                i++;
+            }else{
+                preth=p;
+                p=p->next;
+            }
+        }
+        else{
+            preth=p;
+            p=p->next;
+        }
+    }
+    return i;
 }
     
 List::~List(){
