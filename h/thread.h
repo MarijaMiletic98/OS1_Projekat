@@ -32,6 +32,7 @@ class Thread {
 
     private:
     friend class System;
+    friend class List;
     PCB* myPCB;
     static ID posID;
     ID id;

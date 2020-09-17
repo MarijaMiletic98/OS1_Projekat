@@ -22,6 +22,8 @@ class PCB{
     friend class Thread;
     friend class System;
     friend class KernelSem;
+    friend class List;
+    friend class Event;
     unsigned ss, sp, bp;
     StackSize stackSize;
     Time timeSlice;

@@ -52,7 +52,7 @@ void interrupt System::timerInterrupt(...){
             PCB::running->ss=tss;
             PCB::running->bp=tbp;
 
-            if(PCB::running->blocked==0) Scheduler::put((PCB*)PCB::running);
+            if(PCB::running->blocked==0 && PCB::running->finished==0) Scheduler::put((PCB*)PCB::running);
             PCB::running=Scheduler::get();
 
             if(PCB::running==NULL) PCB::running=loopth->myPCB;

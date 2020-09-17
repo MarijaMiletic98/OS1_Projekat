@@ -4,7 +4,7 @@
 
 volatile PCB* PCB::running=NULL;
 
-PCB::PCB(StackSize sSize, Time tmSlc, Thread* myth):stackSize(sSize/2), timeSlice(tmSlc), myThread(myth), blocked(0), finished(0){ 
+PCB::PCB(StackSize sSize, Time tmSlc, Thread* myth):stackSize(sSize/2), timeSlice(tmSlc), myThread(myth), blocked(0), finished(0), unblockedAfterTime(0){ 
     if(stackSize!=0){
         stack=new unsigned[stackSize];
         stack[stackSize-1]=0x200;

@@ -2,7 +2,7 @@
 
 List::List():head(NULL),last(NULL){}
 
-void List::add(Thread* t, int blockedWaitingTime=0){
+void List::add(Thread* t, int blockedWaitingTime){
     lock
     if(!head) {
         head=new Elem(t,NULL,blockedWaitingTime);
@@ -85,7 +85,7 @@ int List::checkTime(){
                 else p=head;
                 t->myPCB->blocked=0;
                 t->myPCB->unblockedAfterTime=1;
-                Scheduler::put(t);
+                Scheduler::put(t->myPCB);
                 i++;
             }else{
                 preth=p;
